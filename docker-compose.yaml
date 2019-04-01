@@ -1,0 +1,32 @@
+version: '3'
+services:
+  elasticsearch:
+    image: elasticsearch:6.6.0
+    ports: 
+    - "9200:9200"
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=0.0.0.0
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  postgresql_db:
+    build: ./
+    image: dalongrong/zombodb-postgresql-10-centos7
+    ports:
+    - "5432:5432"
+    environment: 
+    - "POSTGRESQL_ADMIN_PASSWORD=dalong"
+  graphql-engine:
+    image: hasura/graphql-engine:v1.0.0-alpha41
+    ports:
+    - "8080:8080"
+    environment:
+    - "POSTGRES_PASSWORD:dalong"
+    command: >
+      /bin/sh -c "
+      graphql-engine --database-url postgres://postgres:dalong@postgresql_db:5432/postgres serve --enable-console;
+      "
